@@ -101,7 +101,7 @@ export const deleteNote = async (
     const note = await prisma.notes
       .delete({
         where: {
-          id,
+          id: id,
         },
       })
       .then((note) => console.log("Note deleted"));
@@ -165,9 +165,9 @@ export const notesRouter = createTRPCRouter({
   //   }),
 
   deleteNote: publicProcedure
-    .input(z.object({ id: z.string() }))
+    .input(z.string())
     .mutation(async ({ ctx, input }) => {
-      const note = await deleteNote(ctx.prisma, input.id);
+      const note = await deleteNote(ctx.prisma, input);
       return note;
     }),
 });
