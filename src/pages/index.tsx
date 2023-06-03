@@ -1,20 +1,19 @@
 import { type NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { api } from "~/utils/api";
+import type { Note } from "~/utils/interfaces";
 
 const Home: NextPage = () => {
+  const [notes, setNotes] = useState<Note[]>([]);
   const utils = api.useContext();
   const { data, isLoading } = api.mynotes.getAllNotes.useQuery();
 
   const deleteNote = api.mynotes.deleteNote.useMutation({
     onMutate: async (id) => {
       await utils.mynotes.getAllNotes.cancel();
-      // const optimisticUpdate = utils.mynotes.getAllNotes.getData();
 
-      // if (optimisticUpdate) {
-      //   utils.mynotes.getAllNotes.setFormData(optimisticUpdate);
-      // }
       onSettled: async () => {
         await utils.mynotes.getAllNotes.invalidate();
       };
@@ -22,6 +21,12 @@ const Home: NextPage = () => {
   });
 
   // console.log(data);
+
+  useEffect(() => {
+    if (data) {
+      setNotes(data);
+    }
+  }, [data]);
 
   return (
     <>
@@ -36,11 +41,13 @@ const Home: NextPage = () => {
         </div>
       ) : (
         <main className="flex min-h-screen flex-col items-center justify-center ">
-          {data ? (
+          {data && data?.length < 1 ? (
+            "no notes yet"
+          ) : (
             <>
               <div>list of all notes</div>
               <div className="bg-blue-100">
-                {data.map((note) => (
+                {notes.map((note) => (
                   // console.log(note.id),
                   <div key={note.id} className="flex flex-row space-x-5">
                     <Link href={`/${note.id ? note.id : ""}`}>
@@ -50,6 +57,10 @@ const Home: NextPage = () => {
                     <button
                       className="text-red-500"
                       onClick={() => {
+                        if (!note.id) {
+                          console.log("no id");
+                          return;
+                        }
                         deleteNote.mutate(note.id);
                       }}
                     >
@@ -65,10 +76,10 @@ const Home: NextPage = () => {
                 ))}
               </div>
             </>
-          ) : (
-            "no notes to show"
           )}
-          <Link href={"/newnote"}>add a note</Link>
+          <Link href={"/newnote"} className="bg-gray-300">
+            add a note
+          </Link>
         </main>
       )}
     </>

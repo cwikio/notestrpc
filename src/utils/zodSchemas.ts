@@ -11,4 +11,5 @@ export const inputFields = z.object({
     .min(5, { message: "min 5 characters" })
     .max(500, { message: "max 500 characters" })
     .trim(),
+  id: z.string().optional(),
 });

@@ -3,6 +3,8 @@ import { publicProcedure, createTRPCRouter } from "../trpc";
 import type { Note } from "~/utils/interfaces";
 import type { Prisma, PrismaClient } from "@prisma/client";
 import { inputFields } from "~/utils/zodSchemas";
+import { TRPCError } from "@trpc/server";
+import { getHTTPStatusCodeFromError } from "@trpc/server/http";
 
 export const getNotes = async (
   prisma: PrismaClient<
@@ -54,7 +56,7 @@ export const getNote = async (
   }
 };
 
-export const upsertNote = async (
+export const createNote = async (
   prisma: PrismaClient<
     Prisma.PrismaClientOptions,
     never,
@@ -62,30 +64,53 @@ export const upsertNote = async (
   >,
   note: Note
 ): Promise<Note> => {
+  let upsertedNote;
   try {
-    note = await prisma.notes.upsert({
-      select: {
-        id: true,
-        title: true,
-        description: true,
+    upsertedNote = await prisma.notes.create({
+      data: note,
+    });
+  } catch (error: any) {
+    console.log(error);
+    throw new TRPCError({
+      code: getHTTPStatusCodeFromError(error),
+      message: error.message,
+    });
+  }
+  if (!note) throw new Error("Note not created");
+  console.log("from notes.ts", upsertedNote);
+  return upsertedNote as Note;
+};
+
+export const updateNote = async (
+  prisma: PrismaClient<
+    Prisma.PrismaClientOptions,
+    never,
+    Prisma.RejectOnNotFound | Prisma.RejectPerOperation | undefined
+  >,
+  note: Note
+): Promise<Note> => {
+  let upsertedNote;
+  console.log("from notes.ts", note);
+  try {
+    upsertedNote = await prisma.notes.update({
+      data: {
+        title: note.title,
+        description: note.description,
       },
       where: {
         id: note.id,
       },
-      update: {
-        title: note.title,
-        description: note.description,
-      },
-      create: {
-        title: note.title,
-        description: note.description,
-      },
     });
-  } catch (error) {
+  } catch (error: any) {
     console.log(error);
+    throw new TRPCError({
+      code: getHTTPStatusCodeFromError(error),
+      message: error.message,
+    });
   }
   if (!note) throw new Error("Note not created");
-  return note;
+  console.log("from notes.ts", upsertedNote);
+  return upsertedNote as Note;
 };
 
 export const deleteNote = async (
@@ -104,7 +129,7 @@ export const deleteNote = async (
           id: id,
         },
       })
-      .then((note) => console.log("Note deleted"));
+      .then((note) => console.log("Note deleted: ", note));
   } catch (error) {
     console.log(error);
   }
@@ -126,7 +151,14 @@ export const notesRouter = createTRPCRouter({
   createNewNote: publicProcedure
     .input(inputFields)
     .mutation(async ({ ctx, input }) => {
-      const note = await upsertNote(ctx.prisma, input);
+      const note = await createNote(ctx.prisma, input);
+      return note;
+    }),
+
+  updateNote: publicProcedure
+    .input(inputFields)
+    .mutation(async ({ ctx, input }) => {
+      const note = await updateNote(ctx.prisma, input);
       return note;
     }),
 

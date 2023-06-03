@@ -1,4 +1,3 @@
-import { subscribe } from "diagnostics_channel";
 import { exampleRouter } from "~/server/api/routers/example";
 import subscribeRouter from "./routers/subscribe";
 import { createTRPCRouter } from "~/server/api/trpc";

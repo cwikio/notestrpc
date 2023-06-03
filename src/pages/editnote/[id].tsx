@@ -21,13 +21,21 @@ const EditNote: NextPage = () => {
   });
 
   const updateNote = api.mynotes.updateNote.useMutation({
-    onMutate: async (note) => {
-      await api.mynotes.getSingleNote.cancel();
-      const optimisticUpdate = utils.mynotes.getSingleNote.getData();
+    onSuccess: async (note) => {
+      await utils.mynotes.getSingleNote.invalidate({ id: note.id });
+      await utils.mynotes.getAllNotes.invalidate();
+      await router.push("/");
+    },
 
-      if (optimisticUpdate) {
-        utils.mynotes.getSingleNote.setFormData(optimisticUpdate);
-      }
+    //   await api.mynotes.getSingleNote.cancel();
+    //   const optimisticUpdate = utils.mynotes.getSingleNote.getData();
+
+    //   if (optimisticUpdate) {
+    //     utils.mynotes.getSingleNote.setFormData(optimisticUpdate);
+    //   }
+    // },
+    onError: (err) => {
+      console.log(err);
     },
   });
 
@@ -49,7 +57,7 @@ const EditNote: NextPage = () => {
     }
   }, [data]);
 
-  console.log(formData);
+  // console.log(formData);
   return (
     <>
       <Head>
@@ -60,10 +68,10 @@ const EditNote: NextPage = () => {
       {isLoading ? (
         <div>loading...</div>
       ) : (
-        <main className="flex min-h-screen flex-col items-center justify-center ">
+        <main className="flex min-h-screen flex-col items-center justify-center space-y-3 ">
           <Link href={"/"}>Back</Link>
-          <h1>add new notes</h1>
-
+          <h1>Update the note</h1>
+          <p>ID: {data?.id}</p>
           <form onSubmit={onSubmit}>
             <div className="flex flex-col space-y-6">
               <input

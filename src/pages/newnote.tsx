@@ -14,16 +14,13 @@ const NewNote: NextPage = () => {
   });
 
   const addNewNote = api.mynotes.createNewNote.useMutation({
-    onMutate: async () => {
+    onSuccess: async (newNote) => {
       await utils.mynotes.getAllNotes.cancel();
-      const optimisticUpdate = utils.mynotes.getAllNotes.getData();
-
-      if (optimisticUpdate) {
-        utils.mynotes.getAllNotes.setFormData(optimisticUpdate);
-      }
-      onSettled: async () => {
-        await utils.mynotes.getAllNotes.invalidate();
-      };
+      await utils.mynotes.getAllNotes.invalidate();
+      console.log("note created: ", newNote);
+    },
+    onError: (error) => {
+      console.log(error);
     },
   });
 
@@ -35,11 +32,11 @@ const NewNote: NextPage = () => {
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    console.log(formData);
     addNewNote.mutate(formData);
     setFormData({ title: "", description: "" });
   };
 
-  console.log(formData);
   return (
     <>
       <Head>
