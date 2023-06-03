@@ -1,13 +1,15 @@
+import { router } from "@trpc/server";
 import { type NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { useState } from "react";
 import { api } from "~/utils/api";
 import type { Note } from "~/utils/interfaces";
 
 const NewNote: NextPage = () => {
   const utils = api.useContext();
-
+  const router = useRouter();
   const [formData, setFormData] = useState<Note>({
     title: "",
     description: "",
@@ -18,6 +20,7 @@ const NewNote: NextPage = () => {
       await utils.mynotes.getAllNotes.cancel();
       await utils.mynotes.getAllNotes.invalidate();
       console.log("note created: ", newNote);
+      await router.push("/");
     },
     onError: (error) => {
       console.log(error);

@@ -1,5 +1,4 @@
-import { use, useEffect, useState } from "react";
-import type { Note } from "../newnote";
+import { useEffect, useState } from "react";
 import { api } from "~/utils/api";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
@@ -27,13 +26,6 @@ const EditNote: NextPage = () => {
       await router.push("/");
     },
 
-    //   await api.mynotes.getSingleNote.cancel();
-    //   const optimisticUpdate = utils.mynotes.getSingleNote.getData();
-
-    //   if (optimisticUpdate) {
-    //     utils.mynotes.getSingleNote.setFormData(optimisticUpdate);
-    //   }
-    // },
     onError: (err) => {
       console.log(err);
     },

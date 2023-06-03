@@ -162,40 +162,6 @@ export const notesRouter = createTRPCRouter({
       return note;
     }),
 
-  //TO BE DELETED?
-  // updateNote: publicProcedure
-  //   .input(
-  //     z.object({
-  //       title: z
-  //         .string()
-  //         .min(5, { message: "min 5 characters" })
-  //         .max(50, { message: "max 50 characters" })
-  //         .trim(),
-  //       description: z
-  //         .string()
-  //         .min(5, { message: "min 5 characters" })
-  //         .max(500, { message: "max 500 characters" })
-  //         .trim(),
-  //     })
-  //   )
-  //   .mutation(async ({ ctx, input }) => {
-  //     try {
-  //       const data = await ctx.prisma.notes.update({
-  //         where: {
-  //           id,
-  //         },
-  //         data: {
-  //           title: input.title,
-  //           description: input.description,
-  //         },
-  //       });
-  //       console.log(data);
-  //       return data;
-  //     } catch (error) {
-  //       console.log(error);
-  //     }
-  //   }),
-
   deleteNote: publicProcedure
     .input(z.string())
     .mutation(async ({ ctx, input }) => {
